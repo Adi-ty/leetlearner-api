@@ -1,44 +1,25 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"net/http"
 
-	"github.com/shurcooL/graphql"
+	transportHttp "github.com/Adi-ty/leetlearner-api/internal/transport/http"
 )
 
-type languageStatsQuery struct {
-	MatchedUser struct {
-		LanguageProblemCount []struct {
-			LanguageName  string `graphql:"languageName"`
-			ProblemsSolved int    `graphql:"problemsSolved"`
-		} `graphql:"languageProblemCount"`
-	} `graphql:"matchedUser(username: $username)"`
+func Run() error {
+	fmt.Println("Starting up server")
+
+    httpHandler := transportHttp.NewHandler()
+	if err := httpHandler.Serve(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func main() {
-	username := "someone"
-
-	apiEndpoint := "https://leetcode.com/graphql"
-
-	client := graphql.NewClient(apiEndpoint, &http.Client{})
-
-	ctx := context.Background()
-
-	var query languageStatsQuery
-
-	variables := map[string]interface{}{
-		"username": graphql.String(username),
-	}
-
-	err := client.Query(ctx, &query, variables)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, lang := range query.MatchedUser.LanguageProblemCount {
-		fmt.Printf("Language: %s, Problems Solved: %d\n", lang.LanguageName, lang.ProblemsSolved)
+    fmt.Println("Leet learner API")
+    if err := Run(); err != nil {
+		fmt.Println(err)
 	}
 }
